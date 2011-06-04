@@ -1,3 +1,7 @@
+.help-link {
+	margin-left: 10px;
+}
+
 #write_permissions_warning {
 	color: red;
 	font-weight: bold;
@@ -16,6 +20,11 @@ input#name {
 	font-style: italic;
 	vertical-align: top;
 	line-height: 20px;
+}
+
+#description-sublabel {
+	color: #457DA5;
+	font-style: italic;
 }
 
 .designer-content-field {
@@ -50,11 +59,27 @@ input#name {
 	padding: 5px;
 }
 
+.designer-content-field-options textarea {
+	width: 95%;
+}
+
+.designer-content-field-image-settings td {
+	padding-top: 5px;
+}
+
+.designer-content-field-image-sizing {
+	width: 500px; /* allows us to force option fields to extend past the right edge of their table cell */
+}
+
+.designer-content-field-image-link {
+	width: 400px; /* allows us to force option fields to extend past the right edge of their table cell */
+}
+
 .static-html-field {
 	width: 100%;
 }
 
-.designer-content-field-editorlabel{
+.designer-content-field-editorlabel {
 	width: 95%;
 	margin-bottom: 10px;
 }
@@ -66,16 +91,6 @@ input#name {
 }
 .designer-content-field-html textarea {
 	width: 95%;
-}
-
-.designer-content-field-image-required {
-	float: left;
-	padding-top: 4px;
-}
-
-.designer-content-field-image-size {
-	float: left;
-	padding-left: 20px;
 }
 
 .static-html-field textarea {
@@ -105,8 +120,19 @@ input#name {
 	font-weight: bold;
 }
 
+#designer-content-submit-wrapper {
+	float: left;
+ 	margin: 5px 0 5px 15%;
+}
 #designer-content-submit {
 	text-align: center;
+}
+
+#designer-content-credits {
+	float: right;
+	text-align: right;
+	font-style: italic;
+	margin: 5px 5px 0 0;
 }
 
 /* Button styles from http://webdesignerwall.com/tutorials/css3-gradient-buttons */

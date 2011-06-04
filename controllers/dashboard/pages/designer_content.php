@@ -1,9 +1,9 @@
 <?php   
 defined('C5_EXECUTE') or die(_("Access Denied."));
 
-class DashboardDesignerContentController extends Controller {
+class DashboardPagesDesignerContentController extends Controller {
 	
-	public $helpers = array('form');
+	public $helpers = array('form'); //makes form helper available to the single_page
 
 	function view() {
 		$html = Loader::helper('html');
@@ -36,6 +36,10 @@ class DashboardDesignerContentController extends Controller {
 		//But just in case... re-validate a few key things (especially that we're not going to overwrite something that already exists)
 		$handle = $this->post('handle');
 		$name = $this->post('name');
+		$name = empty($name) ? '' : strip_tags($name);
+		$description = $this->post('description');
+		$description = empty($description) ? '' : strip_tags($description);
+		
 		if (!is_writable(DIR_FILES_BLOCK_TYPES)) {
 			die(t('Error: Blocks directory is not writeable!'));
 		} else if (empty($handle) || empty($name)) {
@@ -52,8 +56,19 @@ class DashboardDesignerContentController extends Controller {
 		$field_suffixes = $this->post('fieldSuffixes');
 		$field_static_html = $this->post('fieldStaticHtml');
 		$fields_required = $this->post('fieldsRequired');
-		$field_widths = $this->post('fieldWidths');
-		$field_heights = $this->post('fieldHeights');
+		$fields_textbox_maxlengths = $this->post('fieldTextboxMaxlengths');
+		$field_image_links = $this->post('fieldImageLinks');
+		$field_image_link_targets = $this->post('fieldImageLinkTargets');
+		$field_image_show_alt_texts = $this->post('fieldImageShowAltTexts');
+		$field_image_sizings = $this->post('fieldImageSizings');
+		$field_image_widths = $this->post('fieldImageWidths');
+		$field_image_heights = $this->post('fieldImageHeights');
+		$field_url_targets = $this->post('fieldUrlTargets');
+		$field_date_formats = $this->post('fieldDateFormats');
+		$field_select_options = $this->post('fieldSelectOptions');
+		$field_select_show_headers = $this->post('fieldSelectShowHeaders');
+		$field_select_header_texts = $this->post('fieldSelectHeaderTexts');
+		$field_default_contents = $this->post('fieldDefaultContents');
 		
 		//Set up the code generator
 		Loader::library('block_generator', 'designer_content');
@@ -62,24 +77,33 @@ class DashboardDesignerContentController extends Controller {
 			$type = $field_types[$id];
 			if ($type == 'static') {
 				$block->add_static_field($field_static_html[$id]);
-			} else if ($type == 'text') {
-				$block->add_text_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]));
-			} else if ($type == 'image') {
-				$block->add_image_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]), $field_widths[$id], $field_heights[$id]);
+			} else if ($type == 'textbox') {
+				$block->add_textbox_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]), $fields_textbox_maxlengths[$id]);
+			} else if ($type == 'textarea') {
+				$block->add_textarea_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]));
+		    } else if ($type == 'image') {
+				$block->add_image_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]), $field_image_links[$id], $field_image_link_targets[$id], $field_image_show_alt_texts[$id], $field_image_sizings[$id], $field_image_widths[$id], $field_image_heights[$id]);
+			} else if ($type == 'file') {
+				$block->add_file_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]));
 			} else if ($type == 'link') {
 				$block->add_link_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]));
+			} else if ($type == 'url') {
+				$block->add_url_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]), $field_url_targets[$id]);
+			} else if ($type == 'date') {
+				$block->add_date_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], !empty($fields_required[$id]), $field_date_formats[$id]);
+			} else if ($type == 'select') {
+				$block->add_select_field($field_labels[$id], $field_select_options[$id], !empty($fields_required[$id]), $field_select_show_headers[$id], $field_select_header_texts[$id]);
 			} else if ($type == 'wysiwyg') {
-				$block->add_wysiwyg_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id]);
+				$block->add_wysiwyg_field($field_labels[$id], $field_prefixes[$id], $field_suffixes[$id], $field_default_contents[$id]);
 			}
 		}
 		
 		//Make+install block
-		$pkg = Package::getByHandle('designer_content');
-		$block->generate($handle, $name, $this->post('description'), $pkg->getPackageVersion());
+		$block->generate($handle, $name, $description);
 		BlockType::installBlockType($handle);
 		
 		//Redirect back to view page so browser refresh doesn't trigger a re-generation
-		header('Location: ' . View::url("/dashboard/designer_content/?generated={$handle}"));
+		header('Location: ' . View::url("/dashboard/pages/designer_content/?generated={$handle}"));
 		exit;
 	}
 	

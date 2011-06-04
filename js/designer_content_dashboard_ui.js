@@ -10,6 +10,11 @@ $(document).ready(function() {
 	$('a.designer-content-field-delete-no').live('click', toggle_delete_confirmation);
 	$('a.designer-content-field-delete-yes').live('click', delete_field);
 	
+	$('.designer-content-field-image-sizing-dropdown').live('change', toggle_field_image_sizing);
+	$('.designer-content-field-image-link-dropdown').live('change', toggle_field_image_link);
+	
+	$('.designer-content-field-select-header').live('change', toggle_field_select_header);
+	
 	$('#designer-content-submit').click(function() {
 		$('#designer-content-form').submit(); //We use a div instead of a submit button because we don't want the "enter" key triggering the form
 	});
@@ -20,7 +25,7 @@ $(document).ready(function() {
 		// 	$.ajax({
 		// 		type: 'POST',
 		// 		async: false,
-		// 		url: CCM_REL + '/index.php/dashboard/designer_content/generate_block/',
+		// 		url: CCM_REL + '/index.php/dashboard/pages/designer_content/generate_block/',
 		// 		data: $('#designer-content-form').serialize(),
 		// 		success: function() {
 		// 			alert('ok!');
@@ -137,6 +142,28 @@ function delete_field() {
 	return false;
 }
 
+function toggle_field_image_sizing() {
+	var id = $(this).attr('data-id');
+	var sizing = parseInt($(this).val());
+	
+	$('.designer-content-field-image-sizing-options[data-id='+id+']').toggle(sizing > 0);
+	$('.designer-content-field-image-resize-label[data-id='+id+']').toggle(sizing == 1);	
+	$('.designer-content-field-image-crop-label[data-id='+id+']').toggle(sizing == 2);	
+}
+
+function toggle_field_image_link() {
+	var id = $(this).attr('data-id');
+	var link = parseInt($(this).val());
+	
+	$('.designer-content-field-image-link-options[data-id='+id+']').toggle(link == 2);
+}
+
+function toggle_field_select_header() {
+	var id = $(this).attr('data-id');
+	var checked = $(this).is(':checked');
+	$('.designer-content-field-select-header-text[data-id='+id+']').toggle(checked);
+}
+
 function validate_form() {
 	//Name and handle are required
 	//Handle must not already exist in the system (anywhere -- package, block, etc.)
@@ -153,8 +180,9 @@ function validate_form() {
 	var fieldCount = $('.designer-content-field').length;
 	var wysiwygCount = wysiwyg_count();
 	var fieldLabels = $.map($('.designer-content-field-editorlabel'), function(element, index) { return $(element).val(); });
-	var fieldWidths = $.map($('.designer-content-field-width'), function(element, index) { return $(element).val(); });
-	var fieldHeights = $.map($('.designer-content-field-height'), function(element, index) { return $(element).val(); });
+	var fieldImageWidths = $.map($('.designer-content-field-image-width'), function(element, index) { return $(element).val(); });
+	var fieldImageHeights = $.map($('.designer-content-field-image-height'), function(element, index) { return $(element).val(); });
+	var fieldSelectOptions = $.map($('.designer-content-field-select-options'), function(element, index) { return $(element).val(); });
 	
 	if (handle.length == 0) {
 		errors.push(ERROR_MESSAGES['handle_required']);
@@ -187,7 +215,7 @@ function validate_form() {
 	}
 
 	var invalid_widths = false;
-	$.each(fieldWidths, function(index, width) {
+	$.each(fieldImageWidths, function(index, width) {
 		if (width.length > 0 && (isNaN(width) || (width < 1) || (parseInt(width) != width))) {
 			invalid_widths = true;
 		}
@@ -197,13 +225,23 @@ function validate_form() {
 	}
 	
 	var invalid_heights = false;
-	$.each(fieldHeights, function(index, height) {
+	$.each(fieldImageHeights, function(index, height) {
 		if (height.length > 0 && (isNaN(height) || (height < 1) || (parseInt(height) != height))) {
 			invalid_heights = true;
 		}
 	});
 	if (invalid_heights) {
 		errors.push(ERROR_MESSAGES['heights_numeric']);
+	}
+	
+	var missing_options = false;
+	$.each(fieldSelectOptions, function(index, options) {
+		if (options.length == 0) {
+			missing_options = true;
+		}
+	});
+	if (missing_options) {
+		errors.push(ERROR_MESSAGES['options_required']);
 	}
 	
 	if (errors.length > 0) {

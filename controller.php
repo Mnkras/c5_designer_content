@@ -5,26 +5,27 @@ class DesignerContentPackage extends Package {
 	
 	protected $pkgHandle = 'designer_content';
 	protected $appVersionRequired = '5.4.1';
-	protected $pkgVersion = '1.0.0';
+	protected $pkgVersion = '1.9.1';
 	
 	public function getPackageName() {
 		return t("Designer Content"); 
 	}	
 	
 	public function getPackageDescription() {
-		return t('A block type generator for designers and developers. Allows you to easily create block types which display rich content, images, links and text in just the right way.');
+		return t('[***2.0 BETA - NOT FOR PRODUCTION USE***] Provides supporting code for custom content blocks.');
 	}
 
 	public function on_start() {
-		Events::extend('on_page_view', 'DesignerContentPackage', 'on_page_view', 'packages/designer_content/controller.php');
+		//NOTE: Don't use the on_page_view event because that doesn't get fired if "Track Page View Statistics" is turned off!
+		Events::extend('on_before_render', 'DesignerContentPackage', 'on_before_render', DIR_PACKAGES . '/designer_content/controller.php');
 	}
-
-	public function on_page_view() {
+	
+	public function on_before_render() {
 		//Override system js IF user is in edit mode (or in the global scrapbook)
 		if (Page::getCurrentPage()->isEditMode() || Page::getCurrentPage()->getCollectionPath() == '/dashboard/scrapbook') {
 			$html = Loader::helper('html');
 			$view = View::getInstance();
-			$view->addHeaderItem($html->javascript(BASE_URL.DIR_REL.'/packages/designer_content/js/ccm.filemanager.js'), 'CONTROLLER');
+			$view->addHeaderItem($html->javascript(BASE_URL.DIR_REL.'/'.DIRNAME_PACKAGES.'/designer_content/js/ccm.filemanager.js'), 'CONTROLLER');
 			//Note that we passed the 'CONTROLLER' namespace to addHeaderItem() so that it adds our items AFTER the core items
 		}
 	}
@@ -34,12 +35,7 @@ class DesignerContentPackage extends Package {
 		
 		//Install dashboard page
 		Loader::model('single_page');
-		$p = SinglePage::add('/dashboard/designer_content', $pkg);
-		$p->update(array('cDescription' => t('Create custom content block types')));
-
-		//Update permissions so only super-user can see the dashboard page
-		// (leaving this commented out for now because it doesn't seem safe -- how do advanced permissions work?)
-		//$p->updatePermissions(array('cInheritPermissionsFrom' => 'OVERRIDE', 'cOverrideTemplatePermissions' => 1));
+		SinglePage::add('/dashboard/pages/designer_content', $pkg);
 	}
 	
 }
